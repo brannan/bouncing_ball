@@ -1,0 +1,25 @@
+# Odin compiler/cache artifacts
+.odin/
+
+# Compiled binaries and libraries
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.o
+*.obj
+*.wasm
+*.pdb
+*.ilk
+
+# Common build output directories
+bin/
+build/
+dist/
+
+# OS/editor noise
+.DS_Store
+*.swp
+*.swo
