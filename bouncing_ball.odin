@@ -4,12 +4,17 @@ import b2 "vendor:box2d"
 import "core:c"
 import rl "vendor:raylib"
 
-main :: proc() {
-    screen_width: c.int = 800
-    screen_height: c.int = 600
-    pixels_per_meter: f32 = 50.0
+SCREEN_WIDTH :: 800
+SCREEN_HEIGHT :: 600
+PIXELS_PER_METER :: 50.0
 
-    rl.InitWindow(screen_width, screen_height, "Falling Ball")
+PLATFORM_WIDTH_M :: 8.0
+PLATFORM_HEIGHT_M :: 0.5
+
+BALL_RADIUS_M :: 1.0
+
+main :: proc() {
+    rl.InitWindow(c.int(SCREEN_WIDTH), c.int(SCREEN_HEIGHT), "Bouncing Ball")
     defer rl.CloseWindow()
     rl.SetTargetFPS(60)
 
@@ -21,12 +26,12 @@ main :: proc() {
 
     // 2. Create a static platform to bounce on
     platform_def := b2.DefaultBodyDef()
-    platform_def.position = {0, 4.5}
+    platform_def.position = {0, 1.0} // Bodies are just points
     platform_id := b2.CreateBody(world_id, platform_def)
 
     platform_shape_def := b2.DefaultShapeDef()
-    platform_shape_def.material.restitution = 0.8
-    platform_box := b2.MakeBox(4.0, 0.25)
+    platform_shape_def.material.restitution = 0.95
+    platform_box := b2.MakeBox(PLATFORM_WIDTH_M * 0.5, PLATFORM_HEIGHT_M * 0.5)
     _ = b2.CreatePolygonShape(platform_id, platform_shape_def, platform_box)
 
     // 3. Create a dynamic body (a falling ball)
@@ -38,7 +43,7 @@ main :: proc() {
     // 4. Attach a circle shape
     shape_def := b2.DefaultShapeDef()
     shape_def.material.restitution = 0.8
-    circle := b2.Circle{{0, 0}, 1.0}
+    circle := b2.Circle{{0, 0}, BALL_RADIUS_M}
     _ = b2.CreateCircleShape(body_id, shape_def, circle)
 
     // 5. Simulate and render until window close
@@ -51,14 +56,14 @@ main :: proc() {
         ball_pos := b2.Body_GetPosition(body_id)
         platform_pos := b2.Body_GetPosition(platform_id)
 
-        ball_x := c.int(screen_width / 2) + c.int(ball_pos.x * pixels_per_meter)
-        ball_y := c.int(screen_height) - c.int(ball_pos.y * pixels_per_meter)
-        ball_radius := circle.radius * pixels_per_meter
+        ball_x := c.int(SCREEN_WIDTH / 2) + c.int(ball_pos.x * PIXELS_PER_METER)
+        ball_y := c.int(SCREEN_HEIGHT) - c.int(ball_pos.y * PIXELS_PER_METER)
+        ball_radius := circle.radius * PIXELS_PER_METER
 
-        platform_width_px := c.int(8.0 * pixels_per_meter)
-        platform_height_px := c.int(0.5 * pixels_per_meter)
-        platform_x := c.int(screen_width / 2) + c.int(platform_pos.x * pixels_per_meter) - platform_width_px / 2
-        platform_y := c.int(screen_height) - c.int(platform_pos.y * pixels_per_meter) - platform_height_px / 2
+        platform_width_px := c.int(PLATFORM_WIDTH_M * PIXELS_PER_METER)
+        platform_height_px := c.int(PLATFORM_HEIGHT_M * PIXELS_PER_METER)
+        platform_x := c.int(SCREEN_WIDTH / 2) + c.int(platform_pos.x * PIXELS_PER_METER) - platform_width_px / 2
+        platform_y := c.int(SCREEN_HEIGHT) - c.int(platform_pos.y * PIXELS_PER_METER) - platform_height_px / 2
 
         rl.BeginDrawing()
         rl.ClearBackground(rl.RAYWHITE)
